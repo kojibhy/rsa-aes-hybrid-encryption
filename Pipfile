@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pycryptodomex = "*"
+
+
+[dev-packages]
+pytest = "*"
+faker = "*"
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+tests = "pytest -x -c src/pytest.ini"
