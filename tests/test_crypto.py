@@ -1,13 +1,13 @@
 import hashlib
 import random
 import string
+import time
 import unittest
 
 from Cryptodome.Random import get_random_bytes
 
-from helpers.crypto import AESCipher, StringOrBytes, RSACipher
+from src.crypto import AESCipher, StringOrBytes, RSACipher
 
-# Use the system PRNG if possible
 try:
     random = random.SystemRandom()
     using_sysrandom = True

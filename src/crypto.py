@@ -113,7 +113,7 @@ class RSACipher(BaseCipher):
         return aes.decrypt(cipher_text)
 
     @staticmethod
-    def hashed(text: StringOrBytes):
+    def hashed(text: StringOrBytes) -> str:
         if isinstance(text, str):
             hashed = hashlib.sha1(text.encode())
         else:

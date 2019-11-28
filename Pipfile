@@ -15,4 +15,4 @@ faker = "*"
 python_version = "3.7"
 
 [scripts]
-tests = "pytest -x -c src/pytest.ini"
+tests = "pytest -x -c pytest.ini"
