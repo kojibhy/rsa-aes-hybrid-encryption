@@ -35,34 +35,34 @@ class AESCipher(BaseCipher):
     def __init__(self, key, *args, **kwargs):
         self.session_key: bytes = hashlib.sha256(AESCipher.str_to_bytes(key)).digest()
 
-    def encrypt(self, text: StringOrBytes) -> bytes:
-        text: bytes = self.str_to_bytes(text)
-        raw = self._pad(text)
+    def encrypt(self, plaintext: StringOrBytes) -> bytes:
+        plaintext: bytes = self.str_to_bytes(plaintext)
+        raw = self._pad(plaintext)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(self.session_key, AES.MODE_CBC, iv)
         return iv + cipher.encrypt(raw)
 
-    def decrypt(self, cipher_text: StringOrBytes) -> bytes:
+    def decrypt(self, ciphertext: StringOrBytes) -> bytes:
         """ decode all data to bytes """
-        cipher_text: bytes = self.str_to_bytes(cipher_text)
-        iv: bytes = cipher_text[:AES.block_size]
+        ciphertext: bytes = self.str_to_bytes(ciphertext)
+        iv: bytes = ciphertext[:AES.block_size]
         cipher: AES = AES.new(self.session_key, AES.MODE_CBC, iv)
-        return self._unpad(cipher.decrypt(cipher_text[AES.block_size:]))
+        return self._unpad(cipher.decrypt(ciphertext[AES.block_size:]))
 
     def encrypt_b64(self, text: StringOrBytes, to_string=False) -> StringOrBytes:
-        cipher_text = self.encrypt(text)
+        ciphertext = self.encrypt(text)
         if to_string:
-            return base64.b64encode(cipher_text).decode()
+            return base64.b64encode(ciphertext).decode()
         else:
-            return base64.b64encode(cipher_text)
+            return base64.b64encode(ciphertext)
 
-    def decrypt_b64(self, cipher_text: StringOrBytes, to_string=False) -> StringOrBytes:
-        cipher_text: bytes = base64.b64decode(cipher_text)
-        text: bytes = self.decrypt(cipher_text)
+    def decrypt_b64(self, ciphertext: StringOrBytes, to_string=False) -> StringOrBytes:
+        ciphertext: bytes = base64.b64decode(ciphertext)
+        plaintext: bytes = self.decrypt(ciphertext)
         if to_string:
-            return text.decode()
+            return plaintext.decode()
         else:
-            return text
+            return plaintext
 
 
 class RSACipher(BaseCipher):
@@ -84,7 +84,7 @@ class RSACipher(BaseCipher):
         rsa_public_key, rsa_private_key = rsa_key.publickey().export_key(), rsa_key.export_key()
         return rsa_public_key.decode(), rsa_private_key.decode()
 
-    def encrypt(self, text: StringOrBytes, session_key=None) -> typing.Tuple[bytes, bytes]:
+    def encrypt(self, plaintext: StringOrBytes, session_key=None) -> typing.Tuple[bytes, bytes]:
         if not session_key:
             #   For instance, if you use RSA 2048 and SHA-256, the longest message
             #             you can encrypt is 190 byte long.
@@ -100,9 +100,9 @@ class RSACipher(BaseCipher):
 
         # Encrypt the data with the AES session key
         aes = AESCipher(key=session_key)
-        return enc_session_key, aes.encrypt(text)
+        return enc_session_key, aes.encrypt(plaintext)
 
-    def decrypt(self, cipher_text: StringOrBytes, session_key: StringOrBytes) -> bytes:
+    def decrypt(self, ciphertext: StringOrBytes, session_key: StringOrBytes) -> bytes:
         # Decrypt the session key with the private RSA key
         session_key: bytes = self.str_to_bytes(session_key)
 
@@ -110,42 +110,43 @@ class RSACipher(BaseCipher):
         session_key = cipher_rsa.decrypt(session_key)
         # Decrypt the data with the AES session key
         aes = AESCipher(key=session_key)
-        return aes.decrypt(cipher_text)
+        return aes.decrypt(ciphertext)
 
     @staticmethod
-    def hashed(text: StringOrBytes) -> str:
-        if isinstance(text, str):
-            hashed = hashlib.sha1(text.encode())
+    def hashed(plaintext: StringOrBytes) -> str:
+        """:return sha1.hexdigest()"""
+        if isinstance(plaintext, str):
+            hashed = hashlib.sha1(plaintext.encode())
         else:
-            hashed = hashlib.sha1(text)
+            hashed = hashlib.sha1(plaintext)
         return hashed.hexdigest()
 
-    def encrypt_b64(self, text: StringOrBytes,
+    def encrypt_b64(self, plaintext: StringOrBytes,
                     session_key=None, to_string=False) -> typing.Dict[str, StringOrBytes]:
 
-        hashed_value: str = self.hashed(text)
-        aes_session_key, cipher_text = self.encrypt(text, session_key)
+        hashed_value: str = self.hashed(plaintext)
+        aes_session_key, ciphertext = self.encrypt(plaintext, session_key)
 
         if to_string:
             return dict(
                 session_key=base64.b64encode(aes_session_key).decode(),
-                cipher_text=base64.b64encode(cipher_text).decode(),
+                cipher_text=base64.b64encode(ciphertext).decode(),
                 hashed=hashed_value
             )
         else:
             return dict(
                 session_key=base64.b64encode(aes_session_key),
-                cipher_text=base64.b64encode(cipher_text),
+                cipher_text=base64.b64encode(ciphertext),
                 hashed=hashed_value.encode()
             )
 
-    def decrypt_b64(self, cipher_text: StringOrBytes, session_key: StringOrBytes, to_string=False) -> StringOrBytes:
+    def decrypt_b64(self, ciphertext: StringOrBytes, session_key: StringOrBytes, to_string=False) -> StringOrBytes:
         session_key: bytes = base64.b64decode(session_key)
-        cipher_text: bytes = base64.b64decode(cipher_text)
+        ciphertext: bytes = base64.b64decode(ciphertext)
 
-        result: bytes = self.decrypt(cipher_text, session_key)
+        plaintext: bytes = self.decrypt(ciphertext, session_key)
 
         if to_string:
-            return result.decode()
+            return plaintext.decode()
         else:
-            return result
+            return plaintext

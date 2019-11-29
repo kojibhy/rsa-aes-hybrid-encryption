@@ -43,7 +43,6 @@ def random_string(length=12, allowed_chars=(string.ascii_lowercase
         )
     return ''.join(random.choice(allowed_chars) for i in range(length))
 
-
 class TestCryptoAESHelper(unittest.TestCase):
 
     def setUp(self):
@@ -64,65 +63,66 @@ class TestCryptoAESHelper(unittest.TestCase):
         test_value: str = self._test_string
         expected_value: bytes = self._test_bytes_string
         # test case
-        cipher_text: bytes = self._aes.encrypt(test_value)
-        self.assertTrue(isinstance(cipher_text, bytes))
-        text: bytes = self._aes.decrypt(cipher_text)
-        self.assertTrue(isinstance(text, bytes))
-        self.assertEqual(text, expected_value)
+        ciphertext: bytes = self._aes.encrypt(test_value)
+        self.assertTrue(isinstance(ciphertext, bytes))
+        plaintext: bytes = self._aes.decrypt(ciphertext)
+        self.assertTrue(isinstance(plaintext, bytes))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_bytes(self):
         test_value: bytes = self._test_bytes_string
-        cipher_text: bytes = self._aes.encrypt(test_value)
-        self.assertTrue(isinstance(cipher_text, bytes))
-        text: bytes = self._aes.decrypt(cipher_text)
-        self.assertTrue(isinstance(text, bytes))
-        self.assertEqual(text, test_value)
+        ciphertext: bytes = self._aes.encrypt(test_value)
+        self.assertTrue(isinstance(ciphertext, bytes))
+        plaintext: bytes = self._aes.decrypt(ciphertext)
+        self.assertTrue(isinstance(plaintext, bytes))
+        self.assertEqual(plaintext, test_value)
 
     def test_text_as_string_to_b64(self):
         test_value: str = self._test_string
         expected_value: str = self._test_string
-        cipher_text: StringOrBytes = self._aes.encrypt_b64(
+        ciphertext: StringOrBytes = self._aes.encrypt_b64(
             test_value,
             to_string=True
         )
-        self.assertTrue(isinstance(cipher_text, str))
-        text: str = self._aes.decrypt_b64(
-            cipher_text,
+        self.assertTrue(isinstance(ciphertext, str))
+        plaintext: str = self._aes.decrypt_b64(
+            ciphertext,
             to_string=True
         )
-        self.assertTrue(isinstance(text, str))
-        self.assertEqual(text, expected_value)
+        self.assertTrue(isinstance(plaintext, str))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_string_to_b64_to_string(self):
         # test options
         test_value: str = self._test_string
         # test case
-        cipher_text: StringOrBytes = self._aes.encrypt_b64(test_value, to_string=True)
-        self.assertTrue(isinstance(cipher_text, str))
-        text: str = self._aes.decrypt_b64(cipher_text, to_string=True)
-        self.assertTrue(isinstance(text, str))
-        self.assertEqual(text, test_value)
+        ciphertext: StringOrBytes = self._aes.encrypt_b64(test_value, to_string=True)
+        self.assertTrue(isinstance(ciphertext, str))
+        plaintext: str = self._aes.decrypt_b64(ciphertext, to_string=True)
+        self.assertTrue(isinstance(plaintext, str))
+        self.assertEqual(plaintext, test_value)
 
     def test_text_as_bytes_to_b64_to_bytes(self):
         test_value: bytes = self._test_bytes_string
         expected_value: bytes = self._test_bytes_string
-        cipher_text: StringOrBytes = self._aes.encrypt_b64(test_value, to_string=False)
-        self.assertTrue(isinstance(cipher_text, bytes))
-        text: bytes = self._aes.decrypt_b64(cipher_text, to_string=False)
-        self.assertTrue(isinstance(text, bytes))
-        self.assertEqual(text, expected_value)
+        ciphertext: StringOrBytes = self._aes.encrypt_b64(test_value, to_string=False)
+        self.assertTrue(isinstance(ciphertext, bytes))
+        plaintext: bytes = self._aes.decrypt_b64(ciphertext, to_string=False)
+        self.assertTrue(isinstance(plaintext, bytes))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_bytes_to_b64(self):
         test_value: bytes = self._test_bytes_string
         expected_value: bytes = self._test_bytes_string
-        cipher_text: StringOrBytes = self._aes.encrypt_b64(test_value, to_string=False)
-        self.assertTrue(isinstance(cipher_text, bytes))
-        text: bytes = self._aes.decrypt_b64(cipher_text, to_string=False)
-        self.assertTrue(isinstance(text, bytes))
-        self.assertEqual(text, expected_value)
+        ciphertext: StringOrBytes = self._aes.encrypt_b64(test_value, to_string=False)
+        self.assertTrue(isinstance(ciphertext, bytes))
+        plaintext: bytes = self._aes.decrypt_b64(ciphertext, to_string=False)
+        self.assertTrue(isinstance(plaintext, bytes))
+        self.assertEqual(plaintext, expected_value)
 
 
 class TestCryptoRSAHelper(unittest.TestCase):
+
     def setUp(self):
         self._test_string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor ' \
                             'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud ' \
@@ -143,25 +143,25 @@ class TestCryptoRSAHelper(unittest.TestCase):
 
         rsa = RSACipher(self.rsa_public_key)
         session_key: bytes
-        cipher_text: bytes
+        ciphertext: bytes
 
-        session_key, cipher_text = rsa.encrypt(
+        session_key, ciphertext = rsa.encrypt(
             test_value,
             session_key=aes_key
         )
 
         self.assertTrue(isinstance(session_key, bytes))
-        self.assertTrue(isinstance(cipher_text, bytes))
+        self.assertTrue(isinstance(ciphertext, bytes))
 
         rsa = RSACipher(self.rsa_private_key)
 
-        text: bytes = rsa.decrypt(
-            cipher_text,
+        plaintext: bytes = rsa.decrypt(
+            ciphertext,
             session_key
         )
 
-        self.assertTrue(isinstance(cipher_text, bytes))
-        self.assertEqual(text, expected_value)
+        self.assertTrue(isinstance(ciphertext, bytes))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_string_with_session_key(self):
         test_value: str = self._test_string
@@ -170,18 +170,18 @@ class TestCryptoRSAHelper(unittest.TestCase):
 
         rsa = RSACipher(self.rsa_public_key)
 
-        session_key, cipher_text = rsa.encrypt(
+        session_key, ciphertext = rsa.encrypt(
             test_value, session_key=aes_key
         )
 
         self.assertTrue(isinstance(session_key, bytes))
-        self.assertTrue(isinstance(cipher_text, bytes))
+        self.assertTrue(isinstance(ciphertext, bytes))
 
         rsa = RSACipher(self.rsa_private_key)
-        text: bytes = rsa.decrypt(cipher_text, session_key)
+        plaintext: bytes = rsa.decrypt(ciphertext, session_key)
 
-        self.assertTrue(isinstance(cipher_text, bytes))
-        self.assertEqual(text, expected_value)
+        self.assertTrue(isinstance(ciphertext, bytes))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_string_random_session_key(self):
         test_value: str = self._test_string
@@ -189,16 +189,16 @@ class TestCryptoRSAHelper(unittest.TestCase):
 
         rsa = RSACipher(self.rsa_public_key)
 
-        session_key, cipher_text = rsa.encrypt(test_value)
+        session_key, ciphertext = rsa.encrypt(test_value)
 
         self.assertTrue(isinstance(session_key, bytes))
-        self.assertTrue(isinstance(cipher_text, bytes))
+        self.assertTrue(isinstance(ciphertext, bytes))
 
         rsa = RSACipher(self.rsa_private_key)
-        text: bytes = rsa.decrypt(cipher_text, session_key)
+        plaintext: bytes = rsa.decrypt(ciphertext, session_key)
 
-        self.assertTrue(isinstance(cipher_text, bytes))
-        self.assertEqual(text, expected_value)
+        self.assertTrue(isinstance(ciphertext, bytes))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_string_random_session_key_asb64(self):
         test_value: str = self._test_string
@@ -212,23 +212,23 @@ class TestCryptoRSAHelper(unittest.TestCase):
             to_string=True
         )
         session_key: str = dictionary['session_key']
-        cipher_text: str = dictionary['cipher_text']
+        ciphertext: str = dictionary['cipher_text']
         hashed: str = dictionary['hashed']
 
         self.assertTrue(isinstance(session_key, str))
-        self.assertTrue(isinstance(cipher_text, str))
+        self.assertTrue(isinstance(ciphertext, str))
         self.assertTrue(isinstance(hashed, str))
 
         private_rsa = RSACipher(self.rsa_private_key)
 
-        text: StringOrBytes = private_rsa.decrypt_b64(
-            cipher_text,
+        plaintext: StringOrBytes = private_rsa.decrypt_b64(
+            ciphertext,
             session_key,
             to_string=True
         )
 
-        self.assertTrue(isinstance(text, str))
-        self.assertEqual(text, expected_value)
+        self.assertTrue(isinstance(plaintext, str))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_bytes_random_session_key_asb64(self):
         test_value: bytes = self._test_bytes_string
@@ -244,14 +244,14 @@ class TestCryptoRSAHelper(unittest.TestCase):
 
         private_rsa = RSACipher(self.rsa_private_key)
 
-        text: StringOrBytes = private_rsa.decrypt_b64(
+        plaintext: StringOrBytes = private_rsa.decrypt_b64(
             dictionary['cipher_text'],
             dictionary['session_key'],
             to_string=False
         )
 
-        self.assertTrue(isinstance(text, bytes))
-        self.assertEqual(text, expected_value)
+        self.assertTrue(isinstance(plaintext, bytes))
+        self.assertEqual(plaintext, expected_value)
 
     def test_text_as_bytes_to_b64(self):
         test_value: bytes = self._test_bytes_string
@@ -267,11 +267,11 @@ class TestCryptoRSAHelper(unittest.TestCase):
 
         rsa = RSACipher(self.rsa_private_key)
 
-        text: StringOrBytes = rsa.decrypt_b64(
+        plaintext: StringOrBytes = rsa.decrypt_b64(
             dictionary['cipher_text'],
             dictionary['session_key'],
             to_string=False
         )
 
-        self.assertTrue(isinstance(text, bytes))
-        self.assertEqual(text, expected_value)
+        self.assertTrue(isinstance(plaintext, bytes))
+        self.assertEqual(plaintext, expected_value)
